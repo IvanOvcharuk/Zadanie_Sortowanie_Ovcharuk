@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
+import android.widget.Toast
 import kotlinx.coroutines.flow.merge
 import java.util.*
 
@@ -12,12 +13,11 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        var lbl = findViewById<TextView>(R.id.wynlbl)
-        var lbl2 = findViewById<TextView>(R.id.srtlbl)
         var wstawianie = findViewById<TextView>(R.id.wstawianie)
         var babelkowe = findViewById<TextView>(R.id.babelkowe)
         var heapsort = findViewById<TextView>(R.id.heapsort)
         var scalanie = findViewById<TextView>(R.id.scalanie)
+        var szybkie = findViewById<TextView>(R.id.szybkie)
         var wykonaj = findViewById<Button>(R.id.wykonaj)
         var ilerazy = findViewById<EditText>(R.id.ilerazy)
         var ileelementow = findViewById<EditText>(R.id.ileelementow)
@@ -32,7 +32,7 @@ class MainActivity : AppCompatActivity() {
             return t2 - t1
         }
         //wstawianie
-        fun wstawianie(tab: IntArray) { //działa
+        fun wstawianie(tab: IntArray) {
             for (count in 1..tab.count() - 1){
                 val item = tab[count]
                 var i = count
@@ -44,7 +44,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
         //babelkowe
-        fun babelkowe(tab : IntArray) { //działą
+        fun babelkowe(tab : IntArray) {
             for (i in 0 until (tab.size - 1)) {
                 for (j in 0 until (tab.size - i - 1)) {
                     if (tab[j] > tab[j + 1]) {
@@ -159,6 +159,28 @@ class MainActivity : AppCompatActivity() {
 
             return arrayCopy2
         }
+        wykonaj.setOnClickListener {
+            if (ilerazy.text.isNotEmpty() && ileelementow.text.isNotEmpty()) {
+                val numIterations = ilerazy.text.toString().toInt()
+                val numElements = ileelementow.text.toString().toInt()
+                val randomList = losowanie(numElements)
 
+                val sortingFunctions = listOf(::wstawianie, ::babelkowe, ::szybkie, ::heapsort, ::mergeSortIA)
+                val textViews = listOf(wstawianie, babelkowe, szybkie, heapsort, scalanie)
+
+                for ((sortingFunction, textView) in sortingFunctions.zip(textViews)) {
+                    val startTime = System.currentTimeMillis()
+                    repeat(numIterations) {
+                        sortingFunction(randomList)
+                    }
+                    val endTime = System.currentTimeMillis()
+                    textView.text = Czas(startTime, endTime).toString() + " milisekund"
+                }
+            } else {
+                Toast.makeText(this, "Wypełnij wszystkie pola", Toast.LENGTH_SHORT).show()
+            }
+
+
+        }
     }
 }
