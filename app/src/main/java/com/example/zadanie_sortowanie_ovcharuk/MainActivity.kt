@@ -81,6 +81,46 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        //Heapsort
+        var heapSize = 0
+        fun swap(A: IntArray, i: Int, j: Int) {
+            var temp = A[i]
+            A[i] = A[j]
+            A[j] = temp
+        }
+
+        fun max_heapify(A: IntArray, i: Int) {
+            var l = 2*i;
+            var r = 2*i+1;
+            var largest: Int;
+
+            if ((l <= heapSize - 1) && (A[l] > A[i])) {
+                largest = l;
+            } else
+                largest = i
+
+            if ((r <= heapSize - 1) && (A[r] > A[l])) {
+                largest = r
+            }
+
+            if (largest != i) {
+                swap(A, i, largest);
+                max_heapify(A, largest);
+            }
+        }
+
+        fun heapsort(A: IntArray) {
+            heapSize = A.size
+            for (i in heapSize / 2 downTo 0) {
+                max_heapify(A, i)
+            }
+            for (i in A.size - 1 downTo 1) {
+                swap(A, i, 0)
+                heapSize = heapSize - 1
+                max_heapify(A, 0)
+
+            }
+        }
 
     }
 }
