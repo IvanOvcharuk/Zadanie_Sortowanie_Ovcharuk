@@ -43,6 +43,18 @@ class MainActivity : AppCompatActivity() {
                 tab[i] = item
             }
         }
+        //babelkowe
+        fun babelkowe(tab : IntArray) { //działą
+            for (i in 0 until (tab.size - 1)) {
+                for (j in 0 until (tab.size - i - 1)) {
+                    if (tab[j] > tab[j + 1]) {
+                        val tmp = tab[j]
+                        tab[j] = tab[j + 1]
+                        tab[j + 1] = tmp
+                    }
+                }
+            }
+        }
 
     }
 }
