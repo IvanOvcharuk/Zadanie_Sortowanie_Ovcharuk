@@ -10,17 +10,26 @@ import kotlinx.coroutines.flow.merge
 import java.util.*
 
 class MainActivity : AppCompatActivity() {
+    private lateinit var wstawianie: TextView
+    private lateinit var babelkowe: TextView
+    private lateinit var heapsort: TextView
+    private lateinit var scalanie: TextView
+    private lateinit var szybkie: TextView
+    private lateinit var wykonaj: Button
+    private lateinit var ilerazy: EditText
+    private lateinit var ileelementow: EditText
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        var wstawianie = findViewById<TextView>(R.id.wstawianie)
-        var babelkowe = findViewById<TextView>(R.id.babelkowe)
-        var heapsort = findViewById<TextView>(R.id.heapsort)
-        var scalanie = findViewById<TextView>(R.id.scalanie)
-        var szybkie = findViewById<TextView>(R.id.szybkie)
-        var wykonaj = findViewById<Button>(R.id.wykonaj)
-        var ilerazy = findViewById<EditText>(R.id.ilerazy)
-        var ileelementow = findViewById<EditText>(R.id.ileelementow)
+        wstawianie = findViewById(R.id.wstawianie)
+        babelkowe = findViewById(R.id.babelkowe)
+        heapsort = findViewById(R.id.heapsort)
+        scalanie = findViewById(R.id.scalanie)
+        szybkie = findViewById(R.id.szybkie)
+        wykonaj = findViewById(R.id.wykonaj)
+        ilerazy = findViewById(R.id.ilerazy)
+        ileelementow = findViewById(R.id.ileelementow)
 
         fun losowanie(size: Int): MutableList<Int> {
             val random = Random()
@@ -32,11 +41,11 @@ class MainActivity : AppCompatActivity() {
             return t2 - t1
         }
         //wstawianie
-        fun wstawianie(tab: IntArray) {
-            for (count in 1..tab.count() - 1){
+        fun wstawianie(tab: MutableList<Int>) {
+            for (count in 1 until tab.size) {
                 val item = tab[count]
                 var i = count
-                while (i>0 && item < tab[i - 1]){
+                while (i > 0 && item < tab[i - 1]) {
                     tab[i] = tab[i - 1]
                     i -= 1
                 }
@@ -44,7 +53,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
         //babelkowe
-        fun babelkowe(tab : IntArray) {
+        fun babelkowe(tab: MutableList<Int>) {
             for (i in 0 until (tab.size - 1)) {
                 for (j in 0 until (tab.size - i - 1)) {
                     if (tab[j] > tab[j + 1]) {
@@ -56,7 +65,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
         //Szybkie
-        fun partition(array: IntArray, low: Int, high: Int): Int {
+        fun partition(array: MutableList<Int>, low: Int, high: Int): Int {
             val pivot = array[high]
             var i = low - 1
             for (j in low until high) {
@@ -75,112 +84,117 @@ class MainActivity : AppCompatActivity() {
 
         fun szybkie(array: MutableList<Int>, low: Int, high: Int) {
             if (low < high) {
-                val pivot = partition(array.toIntArray(), low, high)
+                val pivot = partition(array, low, high)
                 szybkie(array, low, pivot - 1)
                 szybkie(array, pivot + 1, high)
             }
         }
 
         //Heapsort
-        var heapSize = 0
-        fun swap(A: IntArray, i: Int, j: Int) {
-            var temp = A[i]
-            A[i] = A[j]
-            A[j] = temp
-        }
+        fun heapify(array: MutableList<Int>, n: Int, i: Int) {
+            var largest = i
+            val l = 2 * i + 1
+            val r = 2 * i + 2
 
-        fun max_heapify(A: IntArray, i: Int) {
-            var l = 2*i;
-            var r = 2*i+1;
-            var largest: Int;
+            if (l < n && array[l] > array[largest]) {
+                largest = l
+            }
 
-            if ((l <= heapSize - 1) && (A[l] > A[i])) {
-                largest = l;
-            } else
-                largest = i
-
-            if ((r <= heapSize - 1) && (A[r] > A[l])) {
+            if (r < n && array[r] > array[largest]) {
                 largest = r
             }
 
             if (largest != i) {
-                swap(A, i, largest);
-                max_heapify(A, largest);
+                val temp = array[i]
+                array[i] = array[largest]
+                array[largest] = temp
+
+                heapify(array, n, largest)
             }
         }
 
-        fun heapsort(A: IntArray) {
-            heapSize = A.size
-            for (i in heapSize / 2 downTo 0) {
-                max_heapify(A, i)
+        fun heapsort(array: MutableList<Int>) {
+            for (i in array.size / 2 - 1 downTo 0) {
+                heapify(array, array.size, i)
             }
-            for (i in A.size - 1 downTo 1) {
-                swap(A, i, 0)
-                heapSize = heapSize - 1
-                max_heapify(A, 0)
 
+            for (i in array.size - 1 downTo 0) {
+                val temp = array[0]
+                array[0] = array[i]
+                array[i] = temp
+
+                heapify(array, i, 0)
             }
         }
+
         //Scalanie
-        fun mergeHalvesIA(workA: IntArray,
-                          workB: IntArray,
-                          start: Int,
-                          mid: Int,
-                          exclusiveEnd: Int) {
-            var p1 = start
-            var p2 = mid
-            for (i in start until exclusiveEnd) {
-                if (p1 < mid && (p2 == exclusiveEnd || workA[p1] <= workA[p2])) {
-                    workB[i] = workA[p1]
-                    p1++
+        fun merge(left: IntArray, right: IntArray): IntArray {
+            var leftIndex = 0
+            var rightIndex = 0
+            val result = IntArray(left.size + right.size)
+
+            for (i in result.indices) {
+                if (leftIndex >= left.size) {
+                    result[i] = right[rightIndex++]
+                } else if (rightIndex >= right.size) {
+                    result[i] = left[leftIndex++]
+                } else if (left[leftIndex] < right[rightIndex]) {
+                    result[i] = left[leftIndex++]
                 } else {
-                    workB[i] = workA[p2]
-                    p2++
+                    result[i] = right[rightIndex++]
                 }
             }
+
+            return result
         }
-        fun sortSectionIA(input: IntArray,
-                          output: IntArray,
-                          start: Int,
-                          exclusiveEnd: Int) : Unit {
+        fun scalanie(array: IntArray): IntArray {
+            if (array.size <= 1) return array
 
-            if (exclusiveEnd - start <= 1)
-                return
-            val mid = (start + exclusiveEnd) / 2
-            sortSectionIA(output, input, start, mid)
-            sortSectionIA(output, input, mid, exclusiveEnd)
-            mergeHalvesIA(input, output, start, mid, exclusiveEnd)
-        }
-        fun mergeSortIA(array: IntArray) : IntArray {
-            val arrayCopy = array.copyOf()
-            val arrayCopy2 = array.copyOf()
+            val mid = array.size / 2
+            val left = scalanie(array.copyOfRange(0, mid))
+            val right = scalanie(array.copyOfRange(mid, array.size))
 
-            sortSectionIA(arrayCopy, arrayCopy2, 0, arrayCopy.size)
-
-            return arrayCopy2
+            return merge(left, right)
         }
         wykonaj.setOnClickListener {
-            if (ilerazy.text.isNotEmpty() && ileelementow.text.isNotEmpty()) {
-                val numIterations = ilerazy.text.toString().toInt()
-                val numElements = ileelementow.text.toString().toInt()
-                val randomList = losowanie(numElements)
+            if (ilerazy.text.isNotEmpty() && ileelementow.text.isNotEmpty())
+            {
+                val losowa_lista = losowanie(ileelementow.text.toString().toInt())
 
-                val sortingFunctions = listOf(::wstawianie, ::babelkowe, ::szybkie, ::heapsort, ::mergeSortIA)
-                val textViews = listOf(wstawianie, babelkowe, szybkie, heapsort, scalanie)
+                var temp1 : Long; var temp2 : Long
 
-                for ((sortingFunction, textView) in sortingFunctions.zip(textViews)) {
-                    val startTime = System.currentTimeMillis()
-                    repeat(numIterations) {
-                        sortingFunction(randomList)
-                    }
-                    val endTime = System.currentTimeMillis()
-                    textView.text = Czas(startTime, endTime).toString() + " milisekund"
-                }
-            } else {
-                Toast.makeText(this, "Wypełnij wszystkie pola", Toast.LENGTH_SHORT).show()
+                temp1 = System.currentTimeMillis()
+                for (i in 0..ilerazy.text.toString().toInt())
+                   wstawianie(losowa_lista)
+                temp2 = System.currentTimeMillis()
+                wstawianie.text = Czas(temp1, temp2).toString() + " milisekund"
+
+                temp1 = System.currentTimeMillis()
+                for (i in 0..ilerazy.text.toString().toInt())
+                    babelkowe(losowa_lista)
+                temp2 = System.currentTimeMillis()
+                babelkowe.text =Czas(temp1, temp2).toString() + " milisekund"
+
+                temp1 = System.currentTimeMillis()
+                for (i in 0..ilerazy.text.toString().toInt())
+                    szybkie(losowa_lista, 0, losowa_lista.size - 1)
+                temp2 = System.currentTimeMillis()
+                szybkie.text = Czas(temp1, temp2).toString() + " milisekund"
+
+                temp1 = System.currentTimeMillis()
+                for (i in 0..ilerazy.text.toString().toInt())
+                    heapsort(losowa_lista)
+                temp2 = System.currentTimeMillis()
+                heapsort.text =Czas(temp1, temp2).toString() + " milisekund"
+
+                temp1 = System.currentTimeMillis()
+                for (i in 0..ilerazy.text.toString().toInt())
+                    scalanie(losowa_lista.toIntArray())
+                temp2 = System.currentTimeMillis()
+                scalanie.text = Czas(temp1, temp2).toString() + " milisekund"
             }
-
-
+            else
+                Toast.makeText(this, "Pola nie moga byc puste!", Toast.LENGTH_SHORT).show()
         }
     }
 }
